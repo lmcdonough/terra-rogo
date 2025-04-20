@@ -2,7 +2,7 @@
 terraform {
 
   # terraform version
-  required_version = ">= 1.11.0"
+  required_version = ">= 1.5.7"
 
   # required providers config
   required_providers {
