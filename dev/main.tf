@@ -1,13 +1,13 @@
 # Providers
 provider "aws" {
-  access_key = env("TF_VAR_aws_access_key")
-  secret_key = env("TF_VAR_aws_secret_key")
+  access_key = ""
+  secret_key = ""
   region     = "us-east-1"
 }
 
 # Data
 data "aws_ssm_parameter" "amzn2_linux" {
-  name = "/aws/service/ami-amazon-linus-latest/amzn2-ami-hvm-x86_64-gp2"
+  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
 
 # Resources
