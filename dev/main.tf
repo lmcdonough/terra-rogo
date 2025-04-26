@@ -13,7 +13,7 @@ data "aws_ssm_parameter" "amzn2_linux" {
 # Resources
 
 # Networking
-resource " aws_vpc" "app" {
+resource "aws_vpc" "app" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
 }
@@ -44,7 +44,7 @@ resource "aws_route_table_association" "app_subnet1" {
 }
 # Security Groups
 # Nginx security group
-resource "aws_security_group" "nginx" {
+resource "aws_security_group" "nginx_sg" {
   name   = "nginx_sg"     # give the security group a name
   vpc_id = aws_vpc.app.id # associate the security group with the vpc
 
