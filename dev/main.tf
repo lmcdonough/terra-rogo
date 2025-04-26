@@ -2,7 +2,7 @@
 provider "aws" {
   access_key = env("TF_VAR_aws_access_key")
   secret_key = env("TF_VAR_aws_secret_key")
-  region     = var.aws_region
+  region     = "us-east-1"
 }
 
 # Data
