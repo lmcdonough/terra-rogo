@@ -1,8 +1,8 @@
 # Providers
 provider "aws" {
-  access_key = ""
-  secret_key = ""
-  region     = "us-east-1"
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
+  region     = var.aws_region
 }
 
 # Data
@@ -14,8 +14,8 @@ data "aws_ssm_parameter" "amzn2_linux" {
 
 # Networking
 resource "aws_vpc" "app" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_hostnames = true
+  cidr_block           = var.vpc_cidr_block
+  enable_dns_hostnames = var.enable_dns_hostnames
 }
 
 resource "aws_internet_gateway" "app" {
@@ -23,9 +23,9 @@ resource "aws_internet_gateway" "app" {
 }
 
 resource "aws_subnet" "public_subnet1" {
-  cidr_block              = "10.0.0.0/24"
+  cidr_block              = var.vpc_public_subnet1_cidr_block
   vpc_id                  = aws_vpc.app.id
-  map_public_ip_on_launch = true # makes it public by creating a route to the igw and assigning an elastic ip on launch
+  map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
 }
 
 # Routing
@@ -68,7 +68,7 @@ resource "aws_security_group" "nginx_sg" {
 # Intstances
 resource "aws_instance" "nginx1" {
   ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
-  instance_type          = "t2.micro"
+  instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
   subnet_id              = aws_subnet.public_subnet1.id
   user_data              = <<EOF
