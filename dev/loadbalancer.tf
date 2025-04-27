@@ -14,7 +14,7 @@ resource "aws_lb_target_group" "nginx" {
   name     = "nanny-goat-labs-alb-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.ap.id
+  vpc_id   = aws_vpc.app.id
   tags     = local.common_tags
 }
 
