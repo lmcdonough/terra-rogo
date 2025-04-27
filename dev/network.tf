@@ -6,8 +6,9 @@ provider "aws" {
 }
 
 # Data
-data "aws_ssm_parameter" "amzn2_linux" {
-  name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
+
+data "aws_availability_zones" "available" {
+  state = "available"
 }
 
 # Resources
@@ -24,14 +25,24 @@ resource "aws_internet_gateway" "app" {
   tags   = local.common_tags
 }
 
+#### SUBNETS ###
 resource "aws_subnet" "public_subnet1" {
-  cidr_block              = var.vpc_public_subnet1_cidr_block
+  cidr_block              = var.vpc_public_subnets_cidr_block[0]
   vpc_id                  = aws_vpc.app.id
+  availability_zone       = data.aws_availability_zones.available.names[0]
   map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
   tags                    = local.common_tags
 }
 
-# Routing
+resource "aws_subnet" "public_subnet2" {
+  cidr_block              = var.vpc_public_subnets_cidr_block[1]
+  vpc_id                  = aws_vpc.app.id
+  availability_zone       = data.aws_availability_zones.available.names[1]
+  map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
+  tags                    = local.common_tags
+}
+
+### Routing ###
 resource "aws_route_table" "app" {
   vpc_id = aws_vpc.app.id
   route {
@@ -41,11 +52,17 @@ resource "aws_route_table" "app" {
   tags = local.common_tags
 }
 
-# Associate the route table with the subnet
+# Associate the route table with the subnets
 resource "aws_route_table_association" "app_subnet1" {
   subnet_id      = aws_subnet.public_subnet1.id
   route_table_id = aws_route_table.app.id
 }
+
+resource "aws_route_table_association" "app_subnet2" {
+  subnet_id      = aws_subnet.public_subnet2.id
+  route_table_id = aws_route_table.app.id
+}
+
 # Security Groups
 # Nginx security group
 resource "aws_security_group" "nginx_sg" {
@@ -57,7 +74,7 @@ resource "aws_security_group" "nginx_sg" {
     from_port   = 80
     to_port     = 80
     protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr_block] # allow access from only hosts in the VPC
   }
 
   # outbound internet access
@@ -70,18 +87,24 @@ resource "aws_security_group" "nginx_sg" {
   tags = local.common_tags
 }
 
-# Intstances
-resource "aws_instance" "nginx1" {
-  ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
-  subnet_id              = aws_subnet.public_subnet1.id
-  user_data              = <<EOF
-  #! /bin/bash
-  sudo amazon-linux-extras install -y nginx1
-  sudo service nginx start
-  sudo rm /usr/share/nginx/html/index.html
-  echo '<html><head><title>Terraform Demo</title></head><body><h1>Terraform Demo</h1><p>Welcome to my website!</p></body></html>' | sudo tee /usr/share/nginx/html/index.html"
-  EOF
-  tags                   = local.common_tags
+resource "aws_security_group" "alb_sg" {
+  name   = "nginx_alb_sg" # give the security group a name
+  vpc_id = aws_vpc.app.id # associate the security group with the vpc
+
+  # HTTP access from anywhere
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr_block] # allow access from only hosts in the VPC
+  }
+
+  # outbound internet access
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+  tags = local.common_tags
 }

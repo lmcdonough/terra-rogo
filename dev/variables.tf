@@ -36,10 +36,10 @@ variable "vpc_cidr_block" {
   default     = "10.0.0.0/16"
 }
 
-variable "vpc_public_subnet1_cidr_block" {
-  type        = string
-  description = "the CIDR block for the public subnet 1"
-  default     = "10.0.0.0/24"
+variable "vpc_public_subnets_cidr_block" {
+  type        = list(string)
+  description = "the CIDR block for the public subnets in the VPC"
+  default     = ["10.0.0.0/24", "10.0.1.0/24"]
 }
 
 variable "map_public_ip_on_launch" {
