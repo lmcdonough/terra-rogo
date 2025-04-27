@@ -16,16 +16,19 @@ data "aws_ssm_parameter" "amzn2_linux" {
 resource "aws_vpc" "app" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_hostnames = var.enable_dns_hostnames
+  tags                 = local.common_tags
 }
 
 resource "aws_internet_gateway" "app" {
   vpc_id = aws_vpc.app.id
+  tags   = local.common_tags
 }
 
 resource "aws_subnet" "public_subnet1" {
   cidr_block              = var.vpc_public_subnet1_cidr_block
   vpc_id                  = aws_vpc.app.id
   map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
+  tags                    = local.common_tags
 }
 
 # Routing
@@ -35,6 +38,7 @@ resource "aws_route_table" "app" {
     cidr_block = "0.0.0.0/0"                 # route all traffic (0.0.0.0/0) from the public subnet to the igw
     gateway_id = aws_internet_gateway.app.id #  route all traffic to the igw
   }
+  tags = local.common_tags
 }
 
 # Associate the route table with the subnet
@@ -63,6 +67,7 @@ resource "aws_security_group" "nginx_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  tags = local.common_tags
 }
 
 # Intstances
@@ -78,4 +83,5 @@ resource "aws_instance" "nginx1" {
   sudo rm /usr/share/nginx/html/index.html
   echo '<html><head><title>Terraform Demo</title></head><body><h1>Terraform Demo</h1><p>Welcome to my website!</p></body></html>' | sudo tee /usr/share/nginx/html/index.html"
   EOF
+  tags                   = local.common_tags
 }
