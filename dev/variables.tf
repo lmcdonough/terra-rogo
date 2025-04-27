@@ -53,3 +53,18 @@ variable "instance_type" {
   description = "the type for the ec2 instance"
   default     = "t2.micro"
 }
+
+variable "company" {
+  type        = string
+  description = "the company name for resource tagging"
+}
+
+variable "project" {
+  type        = string
+  description = "the project name for resource tagging"
+}
+
+variable "billing_code" {
+  type        = string
+  description = "the billing code for resource tagging"
+}
