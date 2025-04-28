@@ -35,3 +35,14 @@ resource "aws_instance" "nginx2" {
   EOF
   tags                   = local.common_tags
 }
+
+
+# AWS IAM Role (role for the instances)
+
+
+
+# AWS IAM Role Policy (role policy for S3 access)
+
+
+
+# AWS IAM Instance Profile (profile for the instances)
