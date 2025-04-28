@@ -1,4 +1,3 @@
-
 data "aws_ssm_parameter" "amzn2_linux" {
   name = "/aws/service/ami-amazon-linux-latest/amzn2-ami-hvm-x86_64-gp2"
 }
@@ -80,20 +79,22 @@ resource "aws_iam_role_policy" "allow_s3_all" {
   name   = "allow_s3_all"
   role   = aws_iam_role.allow_nginx_s3.name
   policy = <<EOF
-  {
-    "Version": "2012-10-17",
-    "Statement": [
+{
+  "Version": "2012-10-17",
+  "Statement": [
     {
       "Effect": "Allow",
       "Action": [
         "s3:*"
       ],
-      "Resource": 
-      "arn:aws:s3:::${local.s3_bucket_name}",
-      "arn:aws:s3:::${local.s3_bucket_name}/*"
+      "Resource": [
+        "arn:aws:s3:::${local.s3_bucket_name}",
+        "arn:aws:s3:::${local.s3_bucket_name}/*"
+      ]
     }
-  ]}
-  EOF
+  ]
+}
+EOF
 }
 
 
