@@ -1,10 +1,31 @@
+###################################################################
+# DATA SOURCES
+###################################################################
+
+# AWS IAM POLICY DOCUMENT
+data "aws_iam_policy_document" "allow_alb_logging" {
+  statement {
+    effect = "Allow"
+    principals {
+      type        = "AWS"
+      identifiers = ["${data.aws_elb_service_account.alb_account.arn}"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["${aws_s3_bucket.web_bucket.arn}/alb-logs/*"]
+  }
+}
+
+
+###################################################################
+# RESOURCES
+###################################################################
+
 # Aws S3 Bucket (the bucket itself)
 resource "aws_s3_bucket" "web_bucket" {
   bucket        = local.s3_bucket_name
   force_destroy = true
   tags          = local.common_tags
 }
-
 
 # AWS S3 Bucket Policy (policy for the bucket)
 resource "aws_s3_bucket_policy" "web_bucket" {
@@ -15,7 +36,7 @@ resource "aws_s3_bucket_policy" "web_bucket" {
     "Statement":[{
       "Effect": "Allow",
       "Principal": {
-        "AWS": "${data.aws_elb_service_account.root.arn}"
+        "AWS": "${data.aws_elb_service_account.alb_account.arn}"
     },
     "Action": "s3:PutObject",
     "Resource": "arn:aws:s3:::${local.s3_bucket_name}/alb-logs/*"
@@ -37,7 +58,6 @@ resource "aws_s3_bucket_policy" "web_bucket" {
 POLICY
 }
 
-
 # AWS S3 Object (the object in the bucket)
 resource "aws_s3_object" "website" {
   bucket = aws_s3_bucket.web_bucket.bucket
@@ -47,31 +67,16 @@ resource "aws_s3_object" "website" {
 
 }
 
-
 # AWS S3 Object (an image in the bucket)
 resource "aws_s3_object" "graphic" {
-  bucket = aws_s3_bucket.bucket.bucket
+  bucket = aws_s3_bucket.web_bucket.bucket
   key    = "/website/graphic.png"
   source = "./website/graphic.png"
   tags   = local.common_tags
 }
 
-
-# AWS IAM Role (role for the instances)
-
-
-
-# AWS IAM Role Policy (role policy for S3 access)
-
-
-
-# AWS IAM Instance Profile (profile for the instances)
-
-
-
-# AWS S3 Bucket Policy (grant the load balancer principal access to the bucket)
-
-
-
-
-# AWS ELB Service Account (get the load balancer principal id)
+# AWS S3 BUCKET ACL (grant the load balancer principal access to the bucket)
+resource "aws_s3_bucket_acl" "web_bucket" {
+  bucket = aws_s3_bucket.web_bucket.id
+  acl    = "private"
+}

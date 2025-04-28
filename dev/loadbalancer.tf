@@ -1,8 +1,20 @@
-# aws_elb_service_account
+
+###############################################################
+# DATA SOURCES
+###############################################################
+
+# AWS ELB Service Account ARN
+data "aws_elb_service_account" "alb_account" { # gets the ARN of the AWS ELB service account
+  depends_on = [aws_s3_bucket.web_bucket]
+
+}
+
+###############################################################
+# RESOURCES
+###############################################################
 
 
-
-# aws_lb
+# AWS ALB (application load balancer)
 resource "aws_lb" "nginx" {
   name                       = "nanny-goat-labs-alb"
   internal                   = false
