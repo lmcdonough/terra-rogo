@@ -9,9 +9,10 @@ resource "aws_instance" "nginx1" {
   ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
+  depends_on             = [aws_iam_role_policy.allow_s3_all]
   subnet_id              = aws_subnet.public_subnet1.id
   user_data              = <<EOF
-  #! /bin/bash
   #! /bin/bash
   sudo amazon-linux-extras install -y nginx1
   sudo service nginx start
@@ -22,9 +23,11 @@ resource "aws_instance" "nginx1" {
 }
 
 resource "aws_instance" "nginx2" {
-  ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
+  ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value) # nonsensitive is used to hide the value of the variable from the output
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
+  iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
+  depends_on             = [aws_iam_role_policy.allow_s3_all]
   subnet_id              = aws_subnet.public_subnet2.id
   user_data              = <<EOF
   #! /bin/bash
