@@ -16,10 +16,14 @@ resource "aws_instance" "nginx1" {
   #! /bin/bash
   sudo amazon-linux-extras install -y nginx1
   sudo service nginx start
+  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/website/index.html /home/ec2-user/index.html
+  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/webiste/nannygoat.jpg /home/ec2-user/nannygoat.jpg
   sudo rm /usr/share/nginx/html/index.html
-  echo '<html><head><title>Nanny Goat Labs</title></head><body><h1>Nanny Goat Labs I</h1><p>the original...</p></body></html>' > /usr/share/nginx/html/index.html
+  suco cp /home/ec2-user/index.html /usr/share/nginx/html/index.html
+  sudo cp /home/ec2-user/nannygoat.jpg /usr/share/nginx/html/nannygoat.jpg
   EOF
-  tags                   = local.common_tags
+
+  tags = local.common_tags
 }
 
 resource "aws_instance" "nginx2" {
@@ -33,8 +37,11 @@ resource "aws_instance" "nginx2" {
   #! /bin/bash
   sudo amazon-linux-extras install -y nginx1
   sudo service nginx start
+  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/website/index.html /home/ec2-user/index.html
+  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/webiste/nannygoat.jpg /home/ec2-user/nannygoat.jpg
   sudo rm /usr/share/nginx/html/index.html
-  echo '<html><head><title>Nanny Goat Labs</title></head><body><h1>Nanny Goat Labs II</h1><p>this time it's personal...</p></body></html>' > /usr/share/nginx/html/index.html
+  suco cp /home/ec2-user/index.html /usr/share/nginx/html/index.html
+  sudo cp /home/ec2-user/nannygoat.jpg /usr/share/nginx/html/nannygoat.jpg
   EOF
   tags                   = local.common_tags
 }
