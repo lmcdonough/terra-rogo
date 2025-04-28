@@ -1,31 +1,34 @@
-# Providers
-provider "aws" {
-  access_key = var.aws_access_key
-  secret_key = var.aws_secret_key
-  region     = var.aws_region
-}
+#############################################################################
+# Data Sources
+#############################################################################
 
-# Data
-
+# Availability Zones
 data "aws_availability_zones" "available" {
   state = "available"
 }
 
+############################################################################
 # Resources
+############################################################################
 
-# Networking
+### Networking ###
+
+# VPC
 resource "aws_vpc" "app" {
   cidr_block           = var.vpc_cidr_block
   enable_dns_hostnames = var.enable_dns_hostnames
   tags                 = local.common_tags
 }
 
+# Internet Gateway
 resource "aws_internet_gateway" "app" {
   vpc_id = aws_vpc.app.id
   tags   = local.common_tags
 }
 
 #### SUBNETS ###
+
+# Public Subnet 1
 resource "aws_subnet" "public_subnet1" {
   cidr_block              = var.vpc_public_subnets_cidr_block[0]
   vpc_id                  = aws_vpc.app.id
@@ -34,6 +37,7 @@ resource "aws_subnet" "public_subnet1" {
   tags                    = local.common_tags
 }
 
+# Public Subnet 2
 resource "aws_subnet" "public_subnet2" {
   cidr_block              = var.vpc_public_subnets_cidr_block[1]
   vpc_id                  = aws_vpc.app.id
@@ -43,6 +47,8 @@ resource "aws_subnet" "public_subnet2" {
 }
 
 ### Routing ###
+
+# Route table
 resource "aws_route_table" "app" {
   vpc_id = aws_vpc.app.id
   route {
@@ -52,18 +58,20 @@ resource "aws_route_table" "app" {
   tags = local.common_tags
 }
 
-# Associate the route table with the subnets
+# Route table association with public subnet 1
 resource "aws_route_table_association" "app_subnet1" {
   subnet_id      = aws_subnet.public_subnet1.id
   route_table_id = aws_route_table.app.id
 }
 
+# Route table association with public subnet 2
 resource "aws_route_table_association" "app_subnet2" {
   subnet_id      = aws_subnet.public_subnet2.id
   route_table_id = aws_route_table.app.id
 }
 
-# Security Groups
+### Security Groups ###
+
 # Nginx security group
 resource "aws_security_group" "nginx_sg" {
   name   = "nginx_sg"     # give the security group a name
@@ -87,6 +95,7 @@ resource "aws_security_group" "nginx_sg" {
   tags = local.common_tags
 }
 
+# ALB security group
 resource "aws_security_group" "alb_sg" {
   name   = "nginx_alb_sg" # give the security group a name
   vpc_id = aws_vpc.app.id # associate the security group with the vpc
