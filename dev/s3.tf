@@ -59,7 +59,7 @@ POLICY
 }
 
 # AWS S3 Object (the object in the bucket)
-resource "aws_s3_object" "websit_content" {
+resource "aws_s3_object" "website_content" {
   for_each = local.website_content
   bucket   = aws_s3_bucket.web_bucket.bucket
   key      = each.value
