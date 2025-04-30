@@ -41,15 +41,15 @@ resource "aws_iam_role" "allow_nginx_s3" {
 
 # AWS IAM Instance Profile (profile for the instances)
 resource "aws_iam_instance_profile" "nginx_profile" {
-  name = "nginx_profile"
+  name = "${local.naming_prefix}-nginx-profile"
   role = aws_iam_role.allow_nginx_s3.name
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-nginx-profile" })
 }
 
 
 # AWS IAM Role Policy (role policy for S3 access)
 resource "aws_iam_role_policy" "allow_s3_all" {
-  name   = "allow_s3_all"
+  name   = "${local.naming_prefix}-allow_s3_all"
   role   = aws_iam_role.allow_nginx_s3.name
   policy = <<EOF
 {
