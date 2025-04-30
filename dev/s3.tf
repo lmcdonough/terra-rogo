@@ -67,12 +67,3 @@ resource "aws_s3_object" "website_content" {
   tags     = local.common_tags
 
 }
-
-
-# AWS S3 BUCKET ACL (grant the load balancer principal access to the bucket)
-# resource "aws_s3_bucket_acl" "web_bucket" {
-#   depends_on = [aws_iam_instance_profile.nginx_profile]
-#   bucket     = aws_s3_bucket.web_bucket.id
-#   acl        = "private"
-# }
-# THE CURRENT DEFAULT NOW IS DIFFERENT THAN THE ABOVE SO I COMMENTED IT OUT
