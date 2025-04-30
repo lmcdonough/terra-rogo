@@ -5,12 +5,13 @@ data "aws_ssm_parameter" "amzn2_linux" {
 
 # Instances
 resource "aws_instance" "nginx1" {
+  count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
   instance_type          = var.instance_type
   vpc_security_group_ids = [aws_security_group.nginx_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
   depends_on             = [aws_iam_role_policy.allow_s3_all]
-  subnet_id              = aws_subnet.public_subnet1.id
+  subnet_id              = aws_subnet.public_subnets[count.index].id
   user_data              = <<EOF
   #! /bin/bash
   sudo amazon-linux-extras install -y nginx1

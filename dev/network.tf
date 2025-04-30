@@ -29,20 +29,12 @@ resource "aws_internet_gateway" "app" {
 #### SUBNETS ###
 
 # Public Subnet 1
-resource "aws_subnet" "public_subnet1" {
-  cidr_block              = var.vpc_public_subnets_cidr_block[0]
+resource "aws_subnet" "public_subnets" {
+  count                   = var.vpc_public_subnet_count
+  cidr_block              = var.vpc_public_subnets_cidr_block[count.index] # cidr block for the subnet using count.index
   vpc_id                  = aws_vpc.app.id
-  availability_zone       = data.aws_availability_zones.available.names[0]
-  map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
-  tags                    = local.common_tags
-}
-
-# Public Subnet 2
-resource "aws_subnet" "public_subnet2" {
-  cidr_block              = var.vpc_public_subnets_cidr_block[1]
-  vpc_id                  = aws_vpc.app.id
-  availability_zone       = data.aws_availability_zones.available.names[1]
-  map_public_ip_on_launch = var.map_public_ip_on_launch # makes it public by creating a route to the igw and assigning an elastic ip on launch
+  availability_zone       = data.aws_availability_zones.available.names[count.index] # availability zone for the subnet using count.index
+  map_public_ip_on_launch = var.map_public_ip_on_launch                              # makes it public by creating a route to the igw and assigning an elastic ip on launch
   tags                    = local.common_tags
 }
 
@@ -58,15 +50,10 @@ resource "aws_route_table" "app" {
   tags = local.common_tags
 }
 
-# Route table association with public subnet 1
-resource "aws_route_table_association" "app_subnet1" {
-  subnet_id      = aws_subnet.public_subnet1.id
-  route_table_id = aws_route_table.app.id
-}
-
-# Route table association with public subnet 2
-resource "aws_route_table_association" "app_subnet2" {
-  subnet_id      = aws_subnet.public_subnet2.id
+# Route table association with public subnets
+resource "aws_route_table_association" "app_public_subnets" {
+  count          = var.vpc_public_subnet_count               # number of public subnets
+  subnet_id      = aws_subnet.public_subnets[count.index].id # subnet id for the subnet using count.index
   route_table_id = aws_route_table.app.id
 }
 

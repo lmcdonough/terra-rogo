@@ -53,9 +53,10 @@ resource "aws_lb_listener" "nginx" {
 }
 
 # aws_lb_target_group_attachment
-resource "aws_lb_target_group_attachment" "nginx1" {
-  target_group_arn = aws_lb_target_group.nginx.arn # ARN of the target group
-  target_id        = aws_instance.nginx1.id        # ID of the instance to be attached
+resource "aws_lb_target_group_attachment" "nginx" {
+  count            = var.instance_count
+  target_group_arn = aws_lb_target_group.nginx.arn      # ARN of the target group
+  target_id        = aws_instance.nginx[count.index].id # ID of the instance to be attached
   port             = 80
 }
 

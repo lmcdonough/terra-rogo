@@ -5,6 +5,11 @@ locals {
     billing_code = var.billing_code
   }
   s3_bucket_name = "nanny-goat-labs-${random_integer.s3.result}"
+
+  website_content = {
+    website = "/website/index.html"
+    graphic = "/website/graphic.png"
+  }
 }
 
 resource "random_integer" "s3" {

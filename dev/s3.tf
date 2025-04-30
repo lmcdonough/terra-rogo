@@ -59,21 +59,15 @@ POLICY
 }
 
 # AWS S3 Object (the object in the bucket)
-resource "aws_s3_object" "website" {
-  bucket = aws_s3_bucket.web_bucket.bucket
-  key    = "/website/indext.html"
-  source = "./website/index.html"
-  tags   = local.common_tags
+resource "aws_s3_object" "websit_content" {
+  for_each = local.website_content
+  bucket   = aws_s3_bucket.web_bucket.bucket
+  key      = each.value
+  source   = "${path.root}/${each.value}"
+  tags     = local.common_tags
 
 }
 
-# AWS S3 Object (an image in the bucket)
-resource "aws_s3_object" "graphic" {
-  bucket = aws_s3_bucket.web_bucket.bucket
-  key    = "/website/graphic.png"
-  source = "./website/graphic.png"
-  tags   = local.common_tags
-}
 
 # AWS S3 BUCKET ACL (grant the load balancer principal access to the bucket)
 # resource "aws_s3_bucket_acl" "web_bucket" {
