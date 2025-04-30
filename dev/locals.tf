@@ -10,6 +10,8 @@ locals {
     website = "/website/index.html"
     graphic = "/website/graphic.png"
   }
+
+  naming_prefix = "${var.naming_prefix}-${var.environment}"
 }
 
 resource "random_integer" "s3" {

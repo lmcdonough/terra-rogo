@@ -81,3 +81,15 @@ variable "billing_code" {
   type        = string
   description = "the billing code for resource tagging"
 }
+
+variable "naming_prefix" {
+  type        = string
+  description = "the naming prefix for resource tagging"
+  default     = "goat"
+}
+
+variable "environment" {
+  type        = string
+  description = "the environment for resource tagging"
+  default     = "dev"
+}

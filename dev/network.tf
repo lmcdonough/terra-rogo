@@ -28,10 +28,10 @@ resource "aws_internet_gateway" "app" {
 
 #### SUBNETS ###
 
-# Public Subnet 1
+# Public Subnets
 resource "aws_subnet" "public_subnets" {
   count                   = var.vpc_public_subnet_count
-  cidr_block              = var.vpc_public_subnets_cidr_block[count.index] # cidr block for the subnet using count.index
+  cidr_block              = cidrsubnet(var.vpc_cidr_block, 8, count.index)
   vpc_id                  = aws_vpc.app.id
   availability_zone       = data.aws_availability_zones.available.names[count.index] # availability zone for the subnet using count.index
   map_public_ip_on_launch = var.map_public_ip_on_launch                              # makes it public by creating a route to the igw and assigning an elastic ip on launch
