@@ -4,7 +4,7 @@ data "aws_ssm_parameter" "amzn2_linux" {
 
 
 # Instances
-resource "aws_instance" "nginx1" {
+resource "aws_instance" "nginx" {
   count                  = var.instance_count
   ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value)
   instance_type          = var.instance_type
@@ -12,40 +12,12 @@ resource "aws_instance" "nginx1" {
   iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
   depends_on             = [aws_iam_role_policy.allow_s3_all]
   subnet_id              = aws_subnet.public_subnets[count.index].id
-  user_data              = <<EOF
-  #! /bin/bash
-  sudo amazon-linux-extras install -y nginx1
-  sudo service nginx start
-  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/website/index.html /home/ec2-user/index.html
-  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/webiste/nannygoat.jpg /home/ec2-user/nannygoat.jpg
-  sudo rm /usr/share/nginx/html/index.html
-  suco cp /home/ec2-user/index.html /usr/share/nginx/html/index.html
-  sudo cp /home/ec2-user/nannygoat.jpg /usr/share/nginx/html/nannygoat.jpg
-  EOF
+  user_data = templatefile("${path.module}/templates/startup_script.tpl", {
+    s3_bucket_name = aws_s3_bucket.web_bucket.id
+  })
 
   tags = local.common_tags
 }
-
-resource "aws_instance" "nginx2" {
-  ami                    = nonsensitive(data.aws_ssm_parameter.amzn2_linux.value) # nonsensitive is used to hide the value of the variable from the output
-  instance_type          = var.instance_type
-  vpc_security_group_ids = [aws_security_group.nginx_sg.id]
-  iam_instance_profile   = aws_iam_instance_profile.nginx_profile.name
-  depends_on             = [aws_iam_role_policy.allow_s3_all]
-  subnet_id              = aws_subnet.public_subnet2.id
-  user_data              = <<EOF
-  #! /bin/bash
-  sudo amazon-linux-extras install -y nginx1
-  sudo service nginx start
-  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/website/index.html /home/ec2-user/index.html
-  aws s3 cp s3://${aws_s3_bucket.web_bucket.id}/webiste/nannygoat.jpg /home/ec2-user/nannygoat.jpg
-  sudo rm /usr/share/nginx/html/index.html
-  suco cp /home/ec2-user/index.html /usr/share/nginx/html/index.html
-  sudo cp /home/ec2-user/nannygoat.jpg /usr/share/nginx/html/nannygoat.jpg
-  EOF
-  tags                   = local.common_tags
-}
-
 
 # AWS IAM Role (role for the instances)
 resource "aws_iam_role" "allow_nginx_s3" {
