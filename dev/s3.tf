@@ -1,69 +1,16 @@
-###################################################################
-# DATA SOURCES
-###################################################################
-
-# AWS IAM POLICY DOCUMENT
-data "aws_iam_policy_document" "allow_alb_logging" {
-  statement {
-    effect = "Allow"
-    principals {
-      type        = "AWS"
-      identifiers = ["${data.aws_elb_service_account.alb_account.arn}"]
-    }
-    actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.web_bucket.arn}/alb-logs/*"]
-  }
-}
-
-
-###################################################################
-# RESOURCES
-###################################################################
-
-# Aws S3 Bucket (the bucket itself)
-resource "aws_s3_bucket" "web_bucket" {
-  bucket        = local.s3_bucket_name
-  force_destroy = true
-  tags          = local.common_tags
-}
-
-# AWS S3 Bucket Policy (policy for the bucket)
-resource "aws_s3_bucket_policy" "web_bucket" {
-  bucket = aws_s3_bucket.web_bucket.id
-  policy = <<POLICY
-  {
-    "Version":"2012-10-17",
-    "Statement":[{
-      "Effect": "Allow",
-      "Principal": {
-        "AWS": "${data.aws_elb_service_account.alb_account.arn}"
-    },
-    "Action": "s3:PutObject",
-    "Resource": "arn:aws:s3:::${local.s3_bucket_name}/alb-logs/*"
-    },
-    {
-      "Effect": "Allow",
-      "Principal": {
-        "Service": "delivery.logs.amazonaws.com"
-    },
-    "Action": "s3:PutObject",
-    "Resource": "arn:aws:s3:::${local.s3_bucket_name}/alb-logs/*",
-    "Condition": {
-      "StringEquals": {
-        "s3:x-amz-acl": "bucket-owner-full-control"
-      }
-    }
-    }]
-  }
-POLICY
+module "web_app_s3" {
+  source                  = "../modules/s3"
+  bucket_name             = local.s3_bucket_name
+  elb_service_account_arn = data.aws_elb_service_account.root.arn # the ARN of the ELB service account
+  common_tags             = local.common_tags
 }
 
 # AWS S3 Object (the object in the bucket)
 resource "aws_s3_object" "website_content" {
   for_each = local.website_content
-  bucket   = aws_s3_bucket.web_bucket.bucket
+  bucket   = module.web_app_s3.web_bucket.id # the bucket ID from the module
   key      = each.value
-  source   = "${path.root}/${each.value}"
+  source   = "${path.root}/${each.value}" # path.root is the root of the module
   tags     = local.common_tags
 
 }
