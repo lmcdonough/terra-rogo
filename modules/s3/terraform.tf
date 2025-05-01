@@ -1,0 +1,10 @@
+# the terraform block that specifies the provider configurations
+terraform {
+  required_version = "~> 1.11.0"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "5.96.0"
+    }
+  }
+}
