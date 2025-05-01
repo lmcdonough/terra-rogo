@@ -20,7 +20,7 @@ resource "aws_lb" "nginx" {
   internal                   = false
   load_balancer_type         = "application"
   security_groups            = [aws_security_group.alb_sg.id]
-  subnets                    = aws_subnet.public_subnets.*.id
+  subnets                    = module.app.public_subnets
   depends_on                 = [aws_s3_bucket_policy.web_bucket]
   enable_deletion_protection = false          # allows terraform to destroy the resource (for testing)
   access_logs {                               # logs to s3 bucket
@@ -28,7 +28,7 @@ resource "aws_lb" "nginx" {
     prefix  = "alb-logs"                      # prefix for the logs
     enabled = true
   }
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-alb" })
 }
 
 # aws_lb_target_group
@@ -36,8 +36,8 @@ resource "aws_lb_target_group" "nginx" { # target group for the load balancer
   name     = "nanny-goat-labs-alb-tg"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = aws_vpc.app.id
-  tags     = local.common_tags
+  vpc_id   = module.app.vpc_id # VPC ID
+  tags     = merge(local.common_tags, { Name = "${local.naming_prefix}-alb-tg" })
 }
 
 # aws_lb_listener
@@ -49,7 +49,7 @@ resource "aws_lb_listener" "nginx" {
     type             = "forward"
     target_group_arn = aws_lb_target_group.nginx.arn # ARN of the target group
   }
-  tags = local.common_tags
+  tags = merge(local.common_tags, { Name = "${local.naming_prefix}-alb-listener" })
 }
 
 # aws_lb_target_group_attachment

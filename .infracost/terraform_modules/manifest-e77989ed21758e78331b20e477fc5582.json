@@ -1,1 +1,1 @@
-{"Path":"/Users/levi/vscode_workspaces/terra-rogo/dev","Version":"2.0","Modules":[]}
+{"Path":"/Users/levi/vscode_workspaces/terra-rogo/dev","Version":"2.0","Modules":[{"Key":"app","Source":"registry.terraform.io/terraform-aws-modules/vpc/aws","Version":"5.21.0","Dir":".infracost/terraform_modules/c3be663e91150895074ba78761e0e1e4","DownloadURL":"git::https://github.com/terraform-aws-modules/terraform-aws-vpc?ref=7c1f791efd61f326ed6102d564d1a65d1eceedf0"}]}
