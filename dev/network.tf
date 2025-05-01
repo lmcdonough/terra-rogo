@@ -20,7 +20,7 @@ module "app" {
   cidr    = var.vpc_cidr_block
 
   azs            = slice(data.aws_availability_zones.available.names, 0, var.vpc_public_subnet_count)
-  public_subnets = [for subnet in range(var.var.vpc_public_subnet_count) : cidrsubnet(var.var.vpc_cidr_block, 8, subnet)]
+  public_subnets = [for subnet in range(var.vpc_public_subnet_count) : cidrsubnet(var.vpc_cidr_block, 8, subnet)]
 
   enable_nat_gateway      = false
   enable_vpn_gateway      = false
@@ -57,8 +57,8 @@ resource "aws_security_group" "nginx_sg" {
 
 # ALB security group
 resource "aws_security_group" "alb_sg" {
-  name   = "nginx_alb_sg" # give the security group a name
-  vpc_id = aws_vpc.app.id # associate the security group with the vpc
+  name   = "nginx_alb_sg"       # give the security group a name
+  vpc_id = module.web_app_s3.id # associate the security group with the vpc
 
   # HTTP access from anywhere
   ingress {

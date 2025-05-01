@@ -5,7 +5,7 @@
 
 # AWS ELB Service Account ARN
 data "aws_elb_service_account" "alb_account" { # gets the ARN of the AWS ELB service account
-  depends_on = [aws_s3_bucket.web_bucket]
+  depends_on = [module.web_app_s3]
 
 }
 
@@ -20,12 +20,12 @@ resource "aws_lb" "nginx" {
   internal                   = false
   load_balancer_type         = "application"
   security_groups            = [aws_security_group.alb_sg.id]
-  subnets                    = module.app.public_subnets
-  depends_on                 = [module.web_app_s3] # wait for the s3 bucket to be created
-  enable_deletion_protection = false               # allows terraform to destroy the resource (for testing)
-  access_logs {                                    # logs to s3 bucket
-    bucket  = module.web_app_s3.web_bucket.id      # bucket name
-    prefix  = "alb-logs"                           # prefix for the logs
+  subnets                    = module.web_app_s3.public_subnets # public subnets from the module
+  depends_on                 = [module.web_app_s3]              # wait for the s3 bucket to be created
+  enable_deletion_protection = false                            # allows terraform to destroy the resource (for testing)
+  access_logs {                                                 # logs to s3 bucket
+    bucket  = module.web_app_s3.web_bucket.id                   # bucket name
+    prefix  = "alb-logs"                                        # prefix for the logs
     enabled = true
   }
   tags = merge(local.common_tags, { Name = "${local.naming_prefix}-alb" })

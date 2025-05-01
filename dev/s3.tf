@@ -1,7 +1,7 @@
 module "web_app_s3" {
   source                  = "../modules/s3"
   bucket_name             = local.s3_bucket_name
-  elb_service_account_arn = data.aws_elb_service_account.root.arn # the ARN of the ELB service account
+  elb_service_account_arn = data.aws_elb_service_account.alb_account.arn # the ARN of the ELB service account
   common_tags             = local.common_tags
 }
 
