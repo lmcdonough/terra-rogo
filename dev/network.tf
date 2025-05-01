@@ -57,8 +57,8 @@ resource "aws_security_group" "nginx_sg" {
 
 # ALB security group
 resource "aws_security_group" "alb_sg" {
-  name   = "nginx_alb_sg"       # give the security group a name
-  vpc_id = module.web_app_s3.id # associate the security group with the vpc
+  name   = "nginx_alb_sg"    # give the security group a name
+  vpc_id = module.app.vpc_id # associate the security group with the vpc
 
   # HTTP access from anywhere
   ingress {

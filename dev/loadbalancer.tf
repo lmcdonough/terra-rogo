@@ -5,7 +5,7 @@
 
 # AWS ELB Service Account ARN
 data "aws_elb_service_account" "alb_account" { # gets the ARN of the AWS ELB service account
-  depends_on = [module.web_app_s3]
+  # depends_on = [module.web_app_s3]
 
 }
 
